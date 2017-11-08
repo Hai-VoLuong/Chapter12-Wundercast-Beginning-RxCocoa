@@ -24,14 +24,16 @@ import UIKit
 import RxSwift
 import RxCocoa
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
 
-  @IBOutlet weak var searchCityName: UITextField!
-  @IBOutlet weak var tempLabel: UILabel!
-  @IBOutlet weak var humidityLabel: UILabel!
-  @IBOutlet weak var iconLabel: UILabel!
-  @IBOutlet weak var cityNameLabel: UILabel!
+    // MARK: - IBoutlet
+  @IBOutlet private weak var searchCityName: UITextField!
+  @IBOutlet private weak var tempLabel: UILabel!
+  @IBOutlet private weak var humidityLabel: UILabel!
+  @IBOutlet private weak var iconLabel: UILabel!
+  @IBOutlet private weak var cityNameLabel: UILabel!
 
+     // MARK: - Life Circle
   override func viewDidLoad() {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
@@ -59,8 +61,7 @@ class ViewController: UIViewController {
     // Dispose of any resources that can be recreated.
   }
 
-  // MARK: - Style
-
+  // MARK: - Private func Style
   private func style() {
     view.backgroundColor = UIColor.aztec
     searchCityName.textColor = UIColor.ufoGreen
