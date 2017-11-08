@@ -27,48 +27,73 @@ import RxCocoa
 final class ViewController: UIViewController {
 
     // MARK: - IBoutlet
-  @IBOutlet private weak var searchCityName: UITextField!
-  @IBOutlet private weak var tempLabel: UILabel!
-  @IBOutlet private weak var humidityLabel: UILabel!
-  @IBOutlet private weak var iconLabel: UILabel!
-  @IBOutlet private weak var cityNameLabel: UILabel!
+    @IBOutlet private weak var searchCityName: UITextField!
+    @IBOutlet private weak var tempLabel: UILabel!
+    @IBOutlet private weak var humidityLabel: UILabel!
+    @IBOutlet private weak var iconLabel: UILabel!
+    @IBOutlet private weak var cityNameLabel: UILabel!
 
-     // MARK: - Life Circle
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    // Do any additional setup after loading the view, typically from a nib.
+    // MARK: - Properties
+    private let bag = DisposeBag()
 
-    style()
+    // MARK: - Life Circle
+    override func viewDidLoad() {
+        super.viewDidLoad()
 
-  }
+        Api.shared.currentWeather(city: "RxSwift")
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: { data in
+                self.tempLabel.text = "\(data.temperature)° C"
+                self.iconLabel.text = data.icon
+                self.humidityLabel.text = "\(data.humidity)%"
+                self.cityNameLabel.text = data.cityName
+            }).addDisposableTo(bag)
 
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-  }
+        searchCityName.rx.text
+            .filter{ ($0 ?? "").characters.count > 0 }
+            .flatMap { text in
+                return Api.shared.currentWeather(city: text ?? "Error")
+                .catchErrorJustReturn(Api.Weather.empty)
+            }
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: { data in
+                self.tempLabel.text = "\(data.temperature)° C"
+                self.iconLabel.text = data.icon
+                self.humidityLabel.text = "\(data.humidity)%"
+                self.cityNameLabel.text = data.cityName
+            }).addDisposableTo(bag)
 
-  override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
+        style()
 
-    Appearance.applyBottomLine(to: searchCityName)
-  }
+    }
 
-  override var preferredStatusBarStyle: UIStatusBarStyle {
-    return .lightContent
-  }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
 
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
-  }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
 
-  // MARK: - Private func Style
-  private func style() {
-    view.backgroundColor = UIColor.aztec
-    searchCityName.textColor = UIColor.ufoGreen
-    tempLabel.textColor = UIColor.cream
-    humidityLabel.textColor = UIColor.cream
-    iconLabel.textColor = UIColor.cream
-    cityNameLabel.textColor = UIColor.cream
-  }
+        Appearance.applyBottomLine(to: searchCityName)
+    }
+
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    // MARK: - Private func Style
+    private func style() {
+        view.backgroundColor = UIColor.aztec
+        searchCityName.textColor = UIColor.ufoGreen
+        tempLabel.textColor = UIColor.cream
+        humidityLabel.textColor = UIColor.cream
+        iconLabel.textColor = UIColor.cream
+        cityNameLabel.textColor = UIColor.cream
+    }
 }
 
