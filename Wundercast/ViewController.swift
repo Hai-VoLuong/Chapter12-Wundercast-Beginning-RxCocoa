@@ -49,9 +49,9 @@ final class ViewController: UIViewController {
                 self.cityNameLabel.text = data.cityName
             }).addDisposableTo(bag)
 
-        let search = searchCityName.rx.text
-            .filter{ ($0 ?? "").characters.count > 0 }
-            .flatMapLatest { text in
+        let search = searchCityName.rx.controlEvent(.editingDidEndOnExit).asObservable()
+            .map { self.searchCityName.text }
+            .flatMap { text in
                 return Api.shared.currentWeather(city: text ?? "Error")
                 .catchErrorJustReturn(Api.Weather.empty)
             }
