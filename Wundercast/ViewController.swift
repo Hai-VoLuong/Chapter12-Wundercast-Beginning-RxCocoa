@@ -49,19 +49,18 @@ final class ViewController: UIViewController {
                 self.cityNameLabel.text = data.cityName
             }).addDisposableTo(bag)
 
-        searchCityName.rx.text
+        let search = searchCityName.rx.text
             .filter{ ($0 ?? "").characters.count > 0 }
-            .flatMap { text in
+            .flatMapLatest { text in
                 return Api.shared.currentWeather(city: text ?? "Error")
                 .catchErrorJustReturn(Api.Weather.empty)
             }
             .observeOn(MainScheduler.instance)
-            .subscribe(onNext: { data in
-                self.tempLabel.text = "\(data.temperature)° C"
-                self.iconLabel.text = data.icon
-                self.humidityLabel.text = "\(data.humidity)%"
-                self.cityNameLabel.text = data.cityName
-            }).addDisposableTo(bag)
+
+        search.map {"\($0.temperature)°C"}.bind(to: tempLabel.rx.text).addDisposableTo(bag)
+        search.map {$0.icon }.bind(to: iconLabel.rx.text).addDisposableTo(bag)
+        search.map {"\($0.humidity)%"}.bind(to: humidityLabel.rx.text).addDisposableTo(bag)
+        search.map {$0.cityName}.bind(to: cityNameLabel.rx.text).addDisposableTo(bag)
 
         style()
 
